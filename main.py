@@ -59,30 +59,33 @@ def updateName(username, password, first_name="", last_name=""):
     con.commit()  #change saved
     return thing[0], thing[1]
   return "N/A", "N/A"
-
+#Update money in account
 def updateMoney(username, password, money):
   c.execute("""UPDATE banking 
   SET money = money + (?) 
   WHERE username = (?) 
   AND password = (?) """, (money, username, password))  #change
-  print("Money Transferred")
+  
   c.execute("""SELECT money 
   FROM banking 
   WHERE username = (?) AND password = (?) 
   """, (username, password))  #Used to test out functionality
   thing = c.fetchone()
-  if(thing[0]<0):
+  if(thing[0]<0): #Check if the money is negative
+    #Reset changes and cancel transfer
     c.execute("""UPDATE banking 
     SET money = money - (?) 
     WHERE username = (?) 
     AND password = (?) """, (money, username, password))
     print("Can't have negative money. No money transferred.")
-    return thing[0] - money;
-  else: 
+    return thing[0] - money #Return previous money value
+  else: #Else not necessary but looks nice
+    print("Money Transferred")
     con.commit()  #change saved
-    return thing[0]
-
+    return thing[0] #Return the new money value
+#Delete account
 def delete_account(username, password, first_name, last_name):
+  #Delete account
   c.execute("""DELETE FROM banking 
   WHERE username = (?) AND password = (?) AND first_name = (?) AND last_name = (?) 
   """, (username, password, first_name, last_name))
@@ -92,16 +95,12 @@ def create_account():
   #Have user enter necessary info
   creating_account = True
   while (creating_account):
-    print("Enter your name")
-    creating_account = False
-    #Confirm info with user
-    #Add info to database
     print("-----------\nCreating account\n-----------")
     first_name = str(input("First name: "))
     last_name = str(input("Last name: "))
     username = str(input("Enter a username: "))
     password = str(input("Enter a password: "))
-    
+    #Confirm info with user
     print(f"==========Inserted Information==========\n"
           f"Username: {username}\n"
           f"First name: {first_name}\n"
@@ -111,6 +110,7 @@ def create_account():
     print("=======================================")
     choice = str(input("Y/N: "))
     if (choice == "Y"):
+      #Add info to database
       c.execute(
         """
       INSERT INTO banking (username, first_name, last_name, password, money) 
@@ -119,13 +119,18 @@ def create_account():
       print("Account Created\n")
       con.commit()
     else:
-      print("Cancelling Account Creation\n")
+      #Ask to repeat loop
+      if(input("Would you like to try again? Y/N: ") == "Y")):
+        print("Reseting Account Creation\n")
+      else:
+        print("Exiting Account Creation\n")
+        creating_account = False
+        break
 def access_account():
   #Password and user name
   print("\n-----------Accessing Account-----------\n")
   usern = input("Enter your username: ")
   passw = input("Enter your password: ")
-
   #Check if username and password are in database
   c.execute("""SELECT * 
   FROM banking WHERE password = (?) """, (passw, ))
@@ -133,34 +138,41 @@ def access_account():
   c.execute("""SELECT * 
   FROM banking WHERE username = (?)""", (usern, ))
   data2 = c.fetchone()
-
+  #Check if data retrieved isnt empty
   if(data1 is not None and data2 is not None):
+    #assign data to variables
     uname = data2[0]
     fname = data2[1]
     lname = data2[2]
     password = data2[3]
     money = data2[4]
     dorw = ["deposit", "withdraw"]
-    
+    #check if data is the same
     if (data1 == data2):
+      #access account
       print(f"\nAccess granted. Welcome {fname} {lname}.\n")
       accessing_account = True
       while (accessing_account):
+        #Options for account
         print("\n---What would you like to do?---")
         print("1. Deposit\n2. Withdraw\n3. Check balance\n4. Delete Account\n5. Log out\n")
         choice = int(input("Enter a number: "))
+        #Return to main menu
         if (choice == 5):
           print("\nLogging out...\n")
           accessing_account = False
           break
+        #Deposit or withdraw depending on choice num
         elif (choice == 1 or choice == 2):
           amt = int(
               input(f"\nEnter the amount you would like to {dorw[choice-1]}: "))
           if (choice == 2):
             choice = -1
           money = updateMoney(uname, password, choice * amt)
+        #Print balance
         elif (choice == 3):
           print(f"Current Balance: {money}")
+        #Input confirmation to delete account
         elif(choice == 4):
           if(input("Are you sure you want to delete your account? (Y/N) ") == "Y"):
             delete_account(uname, password, fname, lname)
@@ -169,24 +181,24 @@ def access_account():
       print("Access denied")
   else:
     print("Access denied")
+#Main menu
 print("Welcome to banking app")
-#Num of users?
-num = 0
-
 loop = True
 while loop:
   print("\n------------------Menu------------------")
   print("1. Create account\n2. Access account\n3. Exit\n")
   option = input("Enter a number: ")
+  #Exit
   if option == '3':
     loop = False
     break
+  #Create account
   elif option == '1':
-
     create_account()
+  #Access account
   elif option == '2':
-
     access_account()
+  #Print database
   elif option == '72':
     getDatabase()
   
