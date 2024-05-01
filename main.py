@@ -15,6 +15,7 @@ sql = """
 """
 c.execute(sql)
 
+#PRACTICE WITH SQLITE IS EITHER COMMENTED OUT OR DELETED
 #c.execute("""
 #    INSERT INTO banking (username, first_name, last_name, password, money)
 #    VALUES('WaffleWaffler230', 'Joe', 'Golberg', 'E101M921', 1000),
