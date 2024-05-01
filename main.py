@@ -121,7 +121,7 @@ def create_account():
       con.commit()
     else:
       #Ask to repeat loop
-      if(input("Would you like to try again? Y/N: ") == "Y")):
+      if(input("Would you like to try again? Y/N: ") == "Y"):
         print("Reseting Account Creation\n")
       else:
         print("Exiting Account Creation\n")
