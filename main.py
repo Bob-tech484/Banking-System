@@ -119,6 +119,7 @@ def create_account():
       """, (username, first_name, last_name, password, 0))
       print("Account Created\n")
       con.commit()
+      break
     else:
       #Ask to repeat loop
       if(input("Would you like to try again? Y/N: ") == "Y"):
